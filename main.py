@@ -72,7 +72,7 @@ def create_dog(dog: Dog):
     dogs_db[new_dog_id] = dog
     return dog
 
-@app.get('/dogs', response_model=list[Dog])
+@app.get('/dogs', response_model=List[Dog])
 def get_dogs():
     """
     Получает список всех собак в базе данных.
@@ -91,7 +91,7 @@ def get_dog_by_id(dog_id: int):
         return dogs_db[dog_id]
     return {"error": "Dog not found"}
 
-@app.get('/dogs/type/{dog_type}', response_model=list[Dog])
+@app.get('/dogs/type/{dog_type}', response_model=List[Dog])
 def get_dogs_by_type(dog_type: DogType):
     """
     Получает список собак определенного типа.
