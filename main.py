@@ -14,6 +14,7 @@ class DogType(str, Enum):
     dalmatian = "dalmatian"
 
 
+
 class Dog(BaseModel):
     name: str
     pk: int
@@ -32,7 +33,7 @@ dogs_db = {
     3: Dog(name='Rex', pk=3, kind='dalmatian'),
     4: Dog(name='Pongo', pk=4, kind='dalmatian'),
     5: Dog(name='Tillman', pk=5, kind='bulldog'),
-    6: Dog(name='Uga', pk=6, kind='bulldog')
+    6: Dog(name='Uga', pk=6, kind='bulldog'),
 }
 
 post_db = [
@@ -40,15 +41,15 @@ post_db = [
     Timestamp(id=1, timestamp=10)
 ]
 
-
+# 1. Реализация пути "/"
 @app.get('/')
-def read_root():
+def root():
     """
     Корневой маршрут, который приветствует пользователя.
     """
     return {"message": "Welcome to the Dog Information Service"}
 
-
+# 2. Реализация пути "/post"
 @app.post('/post', response_model=Timestamp)
 def create_post(dog_id: int):
     """
@@ -61,7 +62,9 @@ def create_post(dog_id: int):
     post_db.append(post)
     return post
 
-@app.post('/dogs', response_model=Dog)
+
+# 3. Реализация пути "/dog" для создания собаки
+@app.post('/dog', response_model=Dog)
 def create_dog(dog: Dog):
     """
     Создает новую запись о собаке.
@@ -71,45 +74,54 @@ def create_dog(dog: Dog):
     new_dog_id = max(dogs_db.keys()) + 1
     dogs_db[new_dog_id] = dog
     return dog
-
-@app.get('/dogs', response_model=List[Dog])
-def get_dogs():
+    
+# 4. Реализация пути "/dog" для получения списка собак
+@app.get('/dog')
+def get_dogs(kind: DogType = Query(None, description='Порода собаки',required=False)):
     """
-    Получает список всех собак в базе данных.
+    Получает список всех собак в базе данных или списка собак определенного типа.
+    :param kind: Тип собаки (опциональный параметр).
     :return: Список собак (с объектами Dog).
     """
-    return list(dogs_db.values())
+    if kind:
+        filtered_dogs = [dog for dog in dogs_db.values() if dog.kind == kind]
+        return filtered_dogs
+    else:
+        return list(dogs_db.values())
 
-@app.get('/dogs/{dog_id}', response_model=Dog)
-def get_dog_by_id(dog_id: int):
+
+# 5. Реализация пути "/dog/{pk}" для получения собаки по ID
+@app.get('/dog/{pk}', response_model=Dog)
+def get_dog_by_pk(pk: int):
     """
     Получает информацию о собаке по её идентификатору.
     :param dog_id: Идентификатор собаки.
     :return: Объект Dog с данными о собаке или сообщение об ошибке, если собака не найдена.
     """
-    if dog_id in dogs_db:
-        return dogs_db[dog_id]
-    return {"error": "Dog not found"}
+    # Здесь вы можете добавить логику получения собаки по ID
+    if pk not in dogs_db:
+        raise HTTPException(status_code=404, detail="Dog not found")
+    return dogs_db[pk]
 
-@app.get('/dogs/type/{dog_type}', response_model=List[Dog])
-def get_dogs_by_type(dog_type: DogType):
-    """
-    Получает список собак определенного типа.
-    :param dog_type: Тип собаки (DogType).
-    :return: Список собак данного типа (с объектами Dog).
-    """
-    matching_dogs = [dog for dog in dogs_db.values() if dog.kind == dog_type]
-    return matching_dogs
 
-@app.put('/dogs/{dog_id}', response_model=Dog)
-def update_dog_by_id(dog_id: int, updated_dog: Dog):
+# 6. Реализация пути "/dog/{pk}" для обновления собаки по ID
+@app.patch('/dog/{pk}', response_model=Dog)
+def update_dog(pk: int, updated_dog: Dog):
     """
     Обновляет информацию о собаке с заданным идентификатором.
     :param dog_id: Идентификатор собаки, которую необходимо обновить.
     :param updated_dog: Обновленные данные о собаке.
     :return: Обновленный объект Dog или сообщение об ошибке, если собака не найдена.
     """
-    if dog_id in dogs_db:
-        dogs_db[dog_id] = updated_dog
-        return updated_dog
-    return {"error": "Dog not found"}
+    # Здесь вы можете добавить логику обновления собаки по ID
+    if pk not in dogs_db:
+        raise HTTPException(status_code=404, detail="Dog not found")
+    
+    # Обновляем только существующие поля
+    current_dog = dogs_db[pk]
+    updated_data = updated_dog.dict(exclude_unset=True)
+    updated_dog = current_dog.copy(update=updated_data)
+    dogs_db[pk] = updated_dog
+    return updated_dog
+
+    
