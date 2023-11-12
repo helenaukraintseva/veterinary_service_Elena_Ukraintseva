@@ -78,8 +78,8 @@ curl -X PATCH "http://localhost:8000/dog/3" -H "Content-Type: application/json" 
 
 ## Установка и запуск  
 
-### Сервис запущен по адресу  
-(url)
+### Сервис запущен по адресу 
+ https://veterinary-service.onrender.com/docs
 ### Локальная установка:  
 
 1. Склонируйте репозиторий на вашем компьютере.  
