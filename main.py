@@ -98,7 +98,7 @@ def get_dog_by_pk(pk: int):
     :param dog_id: Идентификатор собаки.
     :return: Объект Dog с данными о собаке или сообщение об ошибке, если собака не найдена.
     """
-    # Здесь вы можете добавить логику получения собаки по ID
+
     if pk not in dogs_db:
         raise HTTPException(status_code=404, detail="Dog not found")
     return dogs_db[pk]
@@ -113,11 +113,11 @@ def update_dog(pk: int, updated_dog: Dog):
     :param updated_dog: Обновленные данные о собаке.
     :return: Обновленный объект Dog или сообщение об ошибке, если собака не найдена.
     """
-    # Здесь вы можете добавить логику обновления собаки по ID
+   
     if pk not in dogs_db:
         raise HTTPException(status_code=404, detail="Dog not found")
     
-    # Обновляем только существующие поля
+   
     current_dog = dogs_db[pk]
     updated_data = updated_dog.dict(exclude_unset=True)
     updated_dog = current_dog.copy(update=updated_data)
